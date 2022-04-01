@@ -33,6 +33,7 @@ library(gganimate)     # for adding animation layers to ggplots
 library(transformr)    # for "tweening" (gganimate)
 library(gifski)        # need the library for creating gifs but don't need to load each time
 library(shiny)         # for creating interactive apps
+library(zoo)
 theme_set(theme_minimal())
 ```
 
@@ -89,7 +90,23 @@ Once your repository is created, you should always open your **project** rather 
   
 
 ```{r}
+small_trains$Date <- as.yearmon(paste(small_trains$year, small_trains$month), "%Y %m")
+```
 
+```{r}
+small_trains %>%
+  filter(departure_station == "PARIS LYON") %>%
+  select(Date, departure_station, arrival_station, total_num_trips) %>%
+  distinct() %>%
+  complete(arrival_station, Date, fill = list(total_num_trips = 0, departure_station = "PARIS LYON")) %>%
+  group_by(arrival_station) %>%
+  mutate(total = sum(total_num_trips)) %>%
+  mutate(cumsum = cumsum(total_num_trips)) %>%
+  ggplot(aes(x = Date, y = cumsum, fill = fct_reorder(arrival_station, total))) +
+  geom_area() +
+  theme(legend.position = c(.35,.8), legend.title = element_blank(), legend.key.size = unit(.1, 'cm')) +
+  labs(title = "Cumulative Sum of Departures from Paris Lyon", x = "", y = "Total # of Departures") +
+  transition_reveal(Date)
 ```
 
 
