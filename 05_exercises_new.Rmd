@@ -90,10 +90,10 @@ Once your repository is created, you should always open your **project** rather 
   
 
 ```{r}
-small_trains$Date <- as.yearmon(paste(small_trains$year, small_trains$month), "%Y %m")
+small_trains$Date<-as.Date(paste(small_trains$year, small_trains$month, "01", sep="-"),"%Y-%m-%d")
 ```
 
-```{r}
+```{r, fig.alt="Cumulative Sum of Departures for Paris Lyon.", eval=FALSE}
 small_trains %>%
   filter(departure_station == "PARIS LYON") %>%
   select(Date, departure_station, arrival_station, total_num_trips) %>%
@@ -107,6 +107,11 @@ small_trains %>%
   theme(legend.position = c(.35,.8), legend.title = element_blank(), legend.key.size = unit(.1, 'cm')) +
   labs(title = "Cumulative Sum of Departures from Paris Lyon", x = "", y = "Total # of Departures") +
   transition_reveal(Date)
+```
+
+```{r}
+anim_save("trains.gif")
+knitr::include_graphics("trains.gif")
 ```
 
 
@@ -141,7 +146,6 @@ garden_harvest %>%
 anim_save("tomatoes.gif")
 knitr::include_graphics("tomatoes.gif")
 ```
-
 
 
 ## Maps, animation, and movement!
