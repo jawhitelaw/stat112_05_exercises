@@ -12,7 +12,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
@@ -84,6 +84,43 @@ Once your repository is created, you should always open your **project** rather 
 
   1. Choose 2 graphs you have created for ANY assignment in this class and add interactivity using the `ggplotly()` function.
   
+```{r}
+library(tidytuesdayR)
+tuesdata <- tidytuesdayR::tt_load('2022-01-25')
+ratings <- tuesdata$ratings
+details <- tuesdata$details
+
+challenge09 <- readr::read_csv('https://raw.githubusercontent.com/ajstarks/dubois-data-portraits/master/challenge/2022/challenge09/data.csv')
+```
+  
+  
+```{r, fig.alt="Board Games' number of users vs their rating showing the highest rated, most popular board games."}
+boardgame_graph <- ratings %>% 
+  filter(users_rated>10000) %>%
+  mutate(norm_ratings = (average - mean(average))/ sd(average)) %>% # z-transformation
+  mutate(log_users = log(users_rated,10)) %>% # log-10 transformation
+  filter(norm_ratings>-4) %>%
+  ggplot(aes(x=norm_ratings, y=log_users, label=name)) +
+  geom_point(size = .2) + 
+  geom_vline(xintercept = 0) +
+  geom_hline(aes(yintercept = mean(log_users))) + 
+  geom_text(aes(label = ifelse((log_users>4.8&norm_ratings>1)|(norm_ratings>2&log_users>4.3)|(log_users>4.9&norm_ratings>.3), as.character(name),'')), hjust=0, vjust=-.5, size = 2) +
+  labs(title = "Board Game Users vs Rating", x = "Normalized Rating", y="Log Transformed Number of User Ratings", caption = "Plot created by Jason Whitelaw, data from Kaggle by way of Board Games Geek") +
+  coord_cartesian(xlim = c(NA,3))
+
+ggplotly(boardgame_graph)
+```
+
+```{r, fig.alt="Graph showing the number of negro students taking the various courses of study offered in georgia schools, tidy tuesday replication challenge."}
+challenge_graph <- challenge09 %>%
+  ggplot(aes(x = STUDENTS, y = fct_reorder(CATEGORY, desc(STUDENTS)))) +
+  geom_col(width = .1, fill = "#AB9681") + 
+  labs(title = "NUMBER OF NEGRO STUDENTS TAKING\nTHE VARIOUS COURSES OF STUDY\nOFFERED IN GEORGIA SCHOOLS.", x = "", y = "") +
+  theme(panel.background = element_rect(fill = "#D6C6B8"), plot.background = element_rect(fill = "#D6C6B8"), panel.grid = element_blank(), axis.text.x = element_blank(), panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.ticks = element_blank(), axis.line = element_blank()) +
+   geom_text(aes(label = STUDENTS), nudge_x = 90)
+
+ggplotly(challenge_graph)
+```
 
   
   2. Use animation to tell an interesting story with the `small_trains` dataset that contains data from the SNCF (National Society of French Railways). These are Tidy Tuesday data! Read more about it [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-26).
@@ -254,7 +291,8 @@ covid19_clean_pop %>%
 ```
 
 ```{r}
-
+anim_save("covid.gif")
+knitr::include_graphics("covid.gif")
 ```
 
 
@@ -262,7 +300,7 @@ covid19_clean_pop %>%
 
   7. This app will also use the COVID data. Make sure you load that data and all the libraries you need in the `app.R` file you create. You should create a new project for the app, separate from the homework project. Below, you will post a link to the app that you publish on shinyapps.io. You will create an app to compare states' daily number of COVID cases per 100,000 over time. The x-axis will be date. You will have an input box where the user can choose which states to compare (`selectInput()`), a slider where the user can choose the date range, and a submit button to click once the user has chosen all states they're interested in comparing. The graph should display a different line for each state, with labels either on the graph or in a legend. Color can be used if needed. 
   
-Put the link to your app here: 
+Put the link to your app here: https://jawhitelaw.shinyapps.io/stat112_05_exercises/
   
 ## GitHub link
 
