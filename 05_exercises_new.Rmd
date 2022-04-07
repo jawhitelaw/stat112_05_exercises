@@ -271,7 +271,8 @@ covid19_clean <- covid19 %>%
   filter(state != "Northern Mariana Islands") %>%
   filter(state != "Puerto Rico") %>%
   filter(state != "Virgin Islands") %>%
-  mutate(state = str_to_lower(state))
+  mutate(state = str_to_lower(state)) %>%
+  filter(day(date) == 15)
 
 covid19_clean_pop <-
   covid19_clean %>% 
@@ -280,14 +281,16 @@ covid19_clean_pop <-
   mutate(cases_per_10000 = (cases/est_pop_2018)*10000)
 ```
 
-```{r}
-covid19_clean_pop %>%
+```{r, fig.alt="State covid cases per 10000 residents over time."}
+covid_anim <- covid19_clean_pop %>%
   ggplot() +
-  geom_map(map = states_map, aes(map_id = state, fill = cases_per_10000)) +
+  geom_map(map = states_map, aes(map_id = state, fill = cases_per_10000, group = date)) +
   expand_limits(x = states_map$long, y = states_map$lat) + 
   theme_map() +
-  labs(subtitle = "Date: {frame_along}", title = "State covid cases per 10000 residents") +
-  transition_reveal(date)
+  labs(subtitle = "Date: {closest_state}", title = "State covid cases per 10000 residents") +
+  transition_states(date)
+
+animate(covid_anim, nframes = 200, end_pause=10)
 ```
 
 ```{r}
@@ -295,6 +298,7 @@ anim_save("covid.gif")
 knitr::include_graphics("covid.gif")
 ```
 
+Overall, state cases per 10,000 residents rapidly increaases over the course of time.
 
 ## Your first `shiny` app (for next week!)
 
